@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chatbot-backend
+    ports:
+      - "8001:8001"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}
+      - MODEL_NAME=${MODEL_NAME:-openai/gpt-4-turbo-preview}
+      - DATABASE_URL=sqlite+aiosqlite:///./chatbot.db
+      - HOST=0.0.0.0
+      - PORT=8001
+      - CORS_ORIGINS=["http://localhost:5173","http://localhost:3000","http://frontend:5173"]
+    volumes:
+      - ./backend:/app
+      - backend-data:/app/data
+    restart: unless-stopped
+    networks:
+      - chatbot-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: chatbot-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8001
+      - VITE_WS_URL=ws://localhost:8001/ws
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - chatbot-network
+
+volumes:
+  backend-data:
+    driver: local
+
+networks:
+  chatbot-network:
+    driver: bridge
