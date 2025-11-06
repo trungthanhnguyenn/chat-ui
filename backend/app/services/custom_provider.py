@@ -21,7 +21,7 @@ class CustomChatbotProvider(BaseChatbotProvider):
         base_url: str,
         endpoint: str,
         description: str = "Custom chatbot endpoint",
-        timeout: float = 30.0
+        timeout: float = 120.0
     ):
         """
         Initialize custom provider
@@ -62,7 +62,9 @@ class CustomChatbotProvider(BaseChatbotProvider):
             logger.info(f"[{self.provider_id}] Starting stream to {self.full_url}")
             logger.debug(f"[{self.provider_id}] Question: {last_message}")
             
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
+            # Configure timeout for streaming (2 minutes = 120 seconds)
+            timeout = httpx.Timeout(self.timeout, connect=10.0)
+            async with httpx.AsyncClient(timeout=timeout) as client:
                 async with client.stream(
                     'POST',
                     self.full_url,

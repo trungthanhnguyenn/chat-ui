@@ -65,8 +65,12 @@ class ChatbotRegistry:
                 continue
             
             # Optional: custom name and description
-            name = os.getenv(f"CUSTOM_NAME_{suffix}", f"Custom Agent {suffix}")
+            name = os.getenv(f"CUSTOM_NAME_{suffix}", f"Finance Agent {suffix}")
             description = os.getenv(f"CUSTOM_DESC_{suffix}", f"Custom chatbot on port {port}")
+            
+            # Optional: custom timeout (default: 120 seconds = 2 minutes)
+            timeout_str = os.getenv(f"CUSTOM_TIMEOUT_{suffix}")
+            timeout = float(timeout_str) if timeout_str else 120.0
             
             # Determine base URL
             host = os.getenv(f"CUSTOM_HOST_{suffix}", "localhost")
@@ -80,7 +84,8 @@ class ChatbotRegistry:
                     name=name,
                     base_url=base_url,
                     endpoint=route,
-                    description=description
+                    description=description,
+                    timeout=timeout
                 )
                 self.register_provider(custom_provider)
                 logger.info(f"Loaded custom provider: {provider_id} at {base_url}{route}")

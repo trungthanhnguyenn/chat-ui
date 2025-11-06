@@ -26,7 +26,7 @@ function App() {
   return (
     <ChatProvider>
       <WebSocketProvider>
-        <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
           {sidebarOpen && (
             <Sidebar
               onClose={() => setSidebarOpen(false)}

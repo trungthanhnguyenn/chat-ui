@@ -18,22 +18,6 @@ export function ProviderSelector() {
 
   return (
     <div className="provider-selector">
-      <label htmlFor="provider-select" className="provider-label">
-        <svg 
-          className="provider-icon" 
-          width="16" 
-          height="16" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          strokeWidth="2"
-        >
-          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-          <path d="M2 17l10 5 10-5"/>
-          <path d="M2 12l10 5 10-5"/>
-        </svg>
-        Chatbot:
-      </label>
       <select
         id="provider-select"
         className="provider-select"
@@ -47,11 +31,6 @@ export function ProviderSelector() {
           </option>
         ))}
       </select>
-      {providers.find(p => p.provider_id === selectedProvider)?.description && (
-        <span className="provider-description">
-          {providers.find(p => p.provider_id === selectedProvider).description}
-        </span>
-      )}
     </div>
   );
 }

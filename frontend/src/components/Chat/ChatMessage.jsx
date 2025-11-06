@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { FiCopy, FiCheck, FiUser, FiCpu } from 'react-icons/fi';
+import { FiCopy, FiCheck, FiUser } from 'react-icons/fi';
 import { copyToClipboard, formatTimestamp } from '../../utils/formatters';
+import logoImage from '../../assets/logo.jpeg';
 
 function ChatMessage({ message }) {
   const [copied, setCopied] = useState(false);
@@ -19,21 +20,25 @@ function ChatMessage({ message }) {
   };
 
   return (
-    <div className={`flex gap-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex gap-3 mb-6 ${isUser ? 'justify-end' : 'justify-start'}`}>
       {!isUser && (
         <div className="flex-shrink-0">
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-            <FiCpu className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-full overflow-hidden shadow-lg ring-2 ring-blue-100 dark:ring-blue-900/30 bg-white dark:bg-gray-800 flex items-center justify-center">
+            <img 
+              src={logoImage} 
+              alt="Twin-T AI" 
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       )}
       
-      <div className={`flex flex-col max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`}>
+      <div className={`flex flex-col max-w-[75%] sm:max-w-[70%] ${isUser ? 'items-end' : 'items-start'}`}>
         <div
-          className={`rounded-2xl px-4 py-3 ${
+          className={`rounded-2xl px-5 py-3.5 shadow-lg transition-all hover:shadow-xl ${
             isUser
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-blue-200/50 dark:shadow-blue-900/30'
+              : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-gray-200/50 dark:shadow-gray-900/50 border border-gray-100 dark:border-gray-700/50'
           }`}
         >
           {isUser ? (
@@ -67,19 +72,19 @@ function ChatMessage({ message }) {
           )}
         </div>
         
-        <div className="flex items-center gap-2 mt-1 px-2">
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+        <div className={`flex items-center gap-2 mt-2 ${isUser ? 'justify-end' : 'justify-start'}`}>
+          <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">
             {formatTimestamp(message.timestamp)}
           </span>
           
           {!isUser && message.content && (
             <button
               onClick={handleCopy}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+              className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-all hover:scale-110 p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
               title="Copy message"
             >
               {copied ? (
-                <FiCheck className="w-4 h-4 text-green-600" />
+                <FiCheck className="w-4 h-4 text-green-500" />
               ) : (
                 <FiCopy className="w-4 h-4" />
               )}
@@ -90,7 +95,7 @@ function ChatMessage({ message }) {
       
       {isUser && (
         <div className="flex-shrink-0">
-          <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center shadow-lg ring-2 ring-gray-100 dark:ring-gray-800">
             <FiUser className="w-5 h-5 text-white" />
           </div>
         </div>
