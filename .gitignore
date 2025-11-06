@@ -88,3 +88,7 @@ generate_frontend.py
 restart_frontend.sh
 test_system.sh
 verify_project.sh
+
+docs/
+
+tests/
