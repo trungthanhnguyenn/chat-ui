@@ -1,0 +1,13 @@
+# Chatbot UI - Main Project Requirements
+
+# Backend dependencies
+# See backend/requirements.txt for backend-specific packages
+
+# Scripts and utilities
+python-dotenv==1.0.0
+
+# Note: To install backend dependencies:
+# cd backend && pip install -r requirements.txt
+
+# Note: To install frontend dependencies:
+# cd frontend && npm install
