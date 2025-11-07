@@ -3,7 +3,15 @@
  */
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+// Auto-detect API URL:
+// 1. If VITE_API_URL is set in .env, use it (for cloudflared/production)
+// 2. Otherwise, use empty string for relative paths (vite proxy will handle it)
+const API_URL = import.meta.env.VITE_API_URL || '';
+
+// Log API URL for debugging
+if (import.meta.env.DEV) {
+  console.log('API Base URL:', API_URL || '(using vite proxy)');
+}
 
 const api = axios.create({
   baseURL: API_URL,
@@ -15,6 +23,7 @@ const api = axios.create({
 // Request interceptor for logging
 api.interceptors.request.use(
   (config) => {
+    console.log('API Request:', config.method?.toUpperCase(), config.url);
     return config;
   },
   (error) => {
@@ -26,10 +35,11 @@ api.interceptors.request.use(
 // Response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
+    console.log('API Response:', response.config.url, response.status, response.data);
     return response;
   },
   (error) => {
-    console.error('API Response Error:', error.response?.data || error.message);
+    console.error('API Response Error:', error.config?.url, error.response?.status, error.response?.data || error.message);
     return Promise.reject(error);
   }
 );

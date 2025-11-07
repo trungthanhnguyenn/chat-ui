@@ -2,7 +2,25 @@
  * WebSocket service for real-time chat streaming
  */
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8001/ws';
+// Auto-detect WebSocket URL:
+// 1. If VITE_WS_URL is set, use it
+// 2. If VITE_API_URL is set, convert http/https to ws/wss
+// 3. Otherwise, use default localhost
+function getWebSocketURL() {
+  if (import.meta.env.VITE_WS_URL) {
+    return import.meta.env.VITE_WS_URL;
+  }
+  
+  const apiUrl = import.meta.env.VITE_API_URL;
+  if (apiUrl) {
+    // Convert http:// to ws:// and https:// to wss://
+    return apiUrl.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:') + '/ws';
+  }
+  
+  return 'ws://localhost:8001/ws';
+}
+
+const WS_URL = getWebSocketURL();
 
 class WebSocketService {
   constructor() {

@@ -81,18 +81,28 @@ export function ChatProvider({ children }) {
 
   const loadProviders = async () => {
     try {
+      console.log('Loading providers...');
       const response = await getProviders();
+      console.log('Providers response:', response);
       
-      if (response.success) {
+      if (response && response.success) {
+        console.log('Setting providers:', response.providers);
         dispatch({ type: 'SET_PROVIDERS', payload: response.providers });
         
         // Set default provider if specified
         if (response.default) {
           dispatch({ type: 'SET_SELECTED_PROVIDER', payload: response.default });
+        } else if (response.providers && response.providers.length > 0) {
+          // Fallback to first provider if no default specified
+          dispatch({ type: 'SET_SELECTED_PROVIDER', payload: response.providers[0].provider_id });
         }
+      } else {
+        console.warn('Providers response not successful:', response);
       }
     } catch (error) {
       console.error('Error loading providers:', error);
+      // Set empty array on error to show loading state
+      dispatch({ type: 'SET_PROVIDERS', payload: [] });
     }
   };
 

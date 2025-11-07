@@ -1,6 +1,8 @@
 .provider-selector {
-  display: flex;
+  display: flex !important;
   align-items: center;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .provider-select {

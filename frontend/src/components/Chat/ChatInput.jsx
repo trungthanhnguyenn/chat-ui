@@ -57,11 +57,11 @@ function ChatInput({ disabled }) {
                 style={{ minHeight: '52px' }}
               />
               {/* Control bar inside textarea container */}
-              <div className="flex items-center justify-between px-5 pb-2">
+              <div className="flex items-center justify-between px-5 pb-2 min-h-[24px]">
                 <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">
                   Press Enter to send, Shift+Enter for new line
                 </p>
-                <div className="flex items-center">
+                <div className="flex items-center flex-shrink-0">
                   <ProviderSelector />
                 </div>
               </div>

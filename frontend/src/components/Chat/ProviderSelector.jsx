@@ -11,9 +11,25 @@ export function ProviderSelector() {
     dispatch({ type: 'SET_SELECTED_PROVIDER', payload: newProvider });
   };
 
+  // Debug: log providers
+  React.useEffect(() => {
+    console.log('ProviderSelector - Providers:', providers);
+    console.log('ProviderSelector - Selected:', selectedProvider);
+  }, [providers, selectedProvider]);
+
   // Don't render if no providers available
   if (!providers || !Array.isArray(providers) || providers.length === 0) {
-    return null;
+    return (
+      <div className="provider-selector">
+        <select
+          id="provider-select"
+          className="provider-select"
+          disabled
+        >
+          <option>Loading...</option>
+        </select>
+      </div>
+    );
   }
 
   return (
@@ -21,7 +37,7 @@ export function ProviderSelector() {
       <select
         id="provider-select"
         className="provider-select"
-        value={selectedProvider}
+        value={selectedProvider || providers[0]?.provider_id}
         onChange={handleProviderChange}
         disabled={state.streaming}
       >
