@@ -9,6 +9,8 @@ from .custom_provider import CustomChatbotProvider
 from app.config import settings
 import logging
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
@@ -42,55 +44,71 @@ class ChatbotRegistry:
     def _load_custom_providers_from_env(self):
         """
         Load custom providers from environment variables
+        Loads full config from /home/chaos/Documents/trung/project/chatbot-ui/backend/.env
         Looks for patterns like:
-        CUSTOM_PORT_1=8004
-        ROUTE_CUSTOM_PORT_1=/v1/agent/finance/response_stream
+        ROUTE_CUSTOM_PORT_1=https://example.com/v1/agent/finance/response_stream (full URL)
         CUSTOM_NAME_1=Finance Agent (optional)
         CUSTOM_DESC_1=Financial analysis chatbot (optional)
         """
-        # Check for CUSTOM_PORT_* environment variables
-        custom_ports = {}
-        for key, value in os.environ.items():
-            if key.startswith("CUSTOM_PORT_"):
-                suffix = key.replace("CUSTOM_PORT_", "")
-                custom_ports[suffix] = value
+        from urllib.parse import urlparse
         
-        # Create provider for each custom port
-        for suffix, port in custom_ports.items():
-            route_key = f"ROUTE_CUSTOM_PORT_{suffix}"
-            route = os.getenv(route_key)
-            
-            if not route:
-                logger.warning(f"Found {key} but no {route_key}, skipping")
-                continue
-            
-            # Optional: custom name and description
-            name = os.getenv(f"CUSTOM_NAME_{suffix}", f"Finance Agent {suffix}")
-            description = os.getenv(f"CUSTOM_DESC_{suffix}", f"Custom chatbot on port {port}")
-            
-            # Optional: custom timeout (default: 120 seconds = 2 minutes)
-            timeout_str = os.getenv(f"CUSTOM_TIMEOUT_{suffix}")
-            timeout = float(timeout_str) if timeout_str else 120.0
-            
-            # Determine base URL
-            host = os.getenv(f"CUSTOM_HOST_{suffix}", "localhost")
-            base_url = f"http://{host}:{port}"
-            
-            provider_id = f"custom_{suffix.lower()}"
-            
+        # Load .env file explicitly from backend directory
+        # Try multiple possible locations
+        backend_dir = Path(__file__).parent.parent.parent  # Go up from app/services/ to backend/
+        env_path = backend_dir / ".env"
+        
+        if not env_path.exists():
+            # Fallback: try absolute path
+            env_path = Path("/home/chaos/Documents/trung/project/chatbot-ui/backend/.env")
+        
+        if env_path.exists():
+            load_dotenv(env_path, override=False)  # override=False: don't override existing env vars
+            logger.info(f"Loaded .env file from: {env_path}")
+        else:
+            logger.warning(f".env file not found at: {env_path}, using system environment variables only")
+        
+        # Check for ROUTE_CUSTOM_PORT_* environment variables (full URLs)
+        custom_routes = {}
+        for key, value in os.environ.items():
+            if key.startswith("ROUTE_CUSTOM_PORT_"):
+                suffix = key.replace("ROUTE_CUSTOM_PORT_", "")
+                # Remove quotes if present
+                route_url = value.strip().strip('"').strip("'")
+                if route_url:
+                    custom_routes[suffix] = route_url
+        
+        # Create provider for each custom route
+        for suffix, full_url in custom_routes.items():
             try:
+                # Parse URL to extract base_url and endpoint
+                parsed = urlparse(full_url)
+                base_url = f"{parsed.scheme}://{parsed.netloc}"
+                endpoint = parsed.path
+                if parsed.query:
+                    endpoint += f"?{parsed.query}"
+                
+                # Optional: custom name and description
+                name = os.getenv(f"CUSTOM_NAME_{suffix}", f"Custom Agent {suffix}")
+                description = os.getenv(f"CUSTOM_DESC_{suffix}", f"Custom chatbot at {full_url}")
+                
+                # Optional: custom timeout (default: 120 seconds = 2 minutes)
+                timeout_str = os.getenv(f"CUSTOM_TIMEOUT_{suffix}")
+                timeout = float(timeout_str) if timeout_str else 120.0
+                
+                provider_id = f"custom_{suffix.lower()}"
+                
                 custom_provider = CustomChatbotProvider(
                     provider_id=provider_id,
                     name=name,
                     base_url=base_url,
-                    endpoint=route,
+                    endpoint=endpoint,
                     description=description,
                     timeout=timeout
                 )
                 self.register_provider(custom_provider)
-                logger.info(f"Loaded custom provider: {provider_id} at {base_url}{route}")
+                logger.info(f"Loaded custom provider: {provider_id} at {full_url}")
             except Exception as e:
-                logger.error(f"Failed to initialize custom provider {provider_id}: {e}")
+                logger.error(f"Failed to initialize custom provider {suffix}: {e}")
     
     def register_provider(self, provider: BaseChatbotProvider):
         """Register a new chatbot provider"""

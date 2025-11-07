@@ -61,10 +61,12 @@ app = FastAPI(
 )
 
 # Configure CORS
+# Allow all origins for cloudflare tunnel support
+# In production, you should restrict this to specific domains
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
+    allow_origins=["*"],  # Allow all origins for cloudflare tunnel
+    allow_credentials=False,  # Must be False when allow_origins=["*"]
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     # Server
     host: str = "0.0.0.0"
     port: int = 8001
-    cors_origins: str = '["http://localhost:5173","http://localhost:3000"]'
+    cors_origins: str = '["http://localhost:5173","http://localhost:3000","https://*.trycloudflare.com"]'
     
     # Security
     secret_key: str = "change-me-in-production"
