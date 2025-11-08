@@ -26,11 +26,18 @@ function chatReducer(state, action) {
     case 'ADD_MESSAGE':
       return { ...state, messages: [...state.messages, action.payload] };
     case 'UPDATE_LAST_MESSAGE':
+      console.log('[REDUCER] UPDATE_LAST_MESSAGE', action.payload);
+      console.log('[REDUCER] Current messages count:', state.messages.length);
       const messages = [...state.messages];
-      messages[messages.length - 1] = {
-        ...messages[messages.length - 1],
-        ...action.payload
-      };
+      if (messages.length > 0) {
+        messages[messages.length - 1] = {
+          ...messages[messages.length - 1],
+          ...action.payload
+        };
+        console.log('[REDUCER] Updated last message content length:', messages[messages.length - 1].content?.length);
+      } else {
+        console.warn('[REDUCER] No messages to update!');
+      }
       return { ...state, messages };
     case 'SET_SESSIONS':
       return { ...state, sessions: action.payload };

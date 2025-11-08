@@ -5,8 +5,9 @@ import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { FiCopy, FiCheck, FiUser } from 'react-icons/fi';
 import { copyToClipboard, formatTimestamp } from '../../utils/formatters';
 import logoImage from '../../assets/logo.jpeg';
+import BorderBeamIndicator from '../Common/BorderBeamIndicator';
 
-function ChatMessage({ message }) {
+function ChatMessage({ message, isStreaming = false }) {
   const [copied, setCopied] = useState(false);
   const isUser = message.role === 'user';
   const isDark = document.documentElement.classList.contains('dark');
@@ -20,7 +21,7 @@ function ChatMessage({ message }) {
   };
 
   return (
-    <div className={`flex gap-3 mb-6 ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex gap-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
       {!isUser && (
         <div className="flex-shrink-0">
           <div className="w-10 h-10 rounded-full overflow-hidden shadow-lg ring-2 ring-blue-100 dark:ring-blue-900/30 bg-white dark:bg-gray-800 flex items-center justify-center">
@@ -35,16 +36,27 @@ function ChatMessage({ message }) {
       
       <div className={`flex flex-col max-w-[75%] sm:max-w-[70%] ${isUser ? 'items-end' : 'items-start'}`}>
         <div
-          className={`rounded-2xl px-5 py-3.5 shadow-lg transition-all hover:shadow-xl ${
+          className={`rounded-2xl px-4 py-3 ${
             isUser
               ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-blue-200/50 dark:shadow-blue-900/30'
               : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-gray-200/50 dark:shadow-gray-900/50 border border-gray-100 dark:border-gray-700/50'
           }`}
+          style={{ position: 'relative', overflow: 'hidden' }}
         >
+          {/* Border Beam for streaming messages */}
+          {!isUser && isStreaming && (
+            <BorderBeamIndicator 
+              isActive={true}
+              duration={8}
+              colorFrom="#6366F1"
+              colorTo="#10B981"
+            />
+          )}
+          
           {isUser ? (
-            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+            <p className="whitespace-pre-wrap break-words relative z-10">{message.content}</p>
           ) : (
-            <div className="markdown-body prose dark:prose-invert max-w-none">
+            <div className="markdown-body prose dark:prose-invert max-w-none relative z-10">
               <ReactMarkdown
                 components={{
                   code({ node, inline, className, children, ...props }) {

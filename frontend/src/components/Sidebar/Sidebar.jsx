@@ -1,9 +1,13 @@
 import React from 'react';
-import { FiX, FiSun, FiMoon } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import { FiX, FiInfo, FiMoon, FiSun } from 'react-icons/fi';
+import { useTheme } from '../../contexts/ThemeContext';
 import ConversationList from './ConversationList';
 import NewChatButton from './NewChatButton';
+import ThemeToggle from '../Common/ThemeToggle';
 
-function Sidebar({ onClose, theme, onToggleTheme }) {
+function Sidebar({ onClose }) {
+  const { theme, toggleTheme } = useTheme();
   return (
     <div className="w-80 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col h-screen shadow-lg">
       {/* Header */}
@@ -14,8 +18,8 @@ function Sidebar({ onClose, theme, onToggleTheme }) {
         
         <div className="flex items-center gap-2">
           <button
-            onClick={onToggleTheme}
-            className="p-2.5 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all hover:scale-110 active:scale-95"
+            onClick={toggleTheme}
+            className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             aria-label="Toggle theme"
           >
             {theme === 'light' ? (
@@ -45,10 +49,23 @@ function Sidebar({ onClose, theme, onToggleTheme }) {
         <ConversationList />
       </div>
       
+      {/* About Us Section */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <Link
+          to="/about"
+          className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors group"
+        >
+          <FiInfo className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-blue-500" />
+          <span className="text-sm text-gray-600 dark:text-gray-300 group-hover:text-blue-500">
+            About Us
+          </span>
+        </Link>
+      </div>
+
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white/30 dark:bg-gray-800/30 backdrop-blur-sm">
-        <p className="text-xs text-gray-500 dark:text-gray-400 text-center font-medium">
-          Twin-T v1.0.0
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+          © 2025 Twin-T. All rights reserved.
         </p>
       </div>
     </div>

@@ -5,11 +5,16 @@ import { useChat } from './ChatContext';
 
 const WebSocketContext = createContext();
 
+// Throttle streaming updates to control render speed
+const STREAM_THROTTLE_MS = 50; // Update UI every 50ms max
+
 export function WebSocketProvider({ children }) {
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState(null);
   const clientIdRef = useRef(`client_${uuidv4()}`);
   const streamingContentRef = useRef('');
+  const throttleTimeoutRef = useRef(null);
+  const lastUpdateTimeRef = useRef(0);
   const handlersRegisteredRef = useRef(false);
   const { state, dispatch } = useChat();
 
@@ -44,6 +49,7 @@ export function WebSocketProvider({ children }) {
       dispatch({
         type: 'ADD_MESSAGE',
         payload: {
+          id: uuidv4(), // Add unique ID for each message
           role: 'assistant',
           content: '',
           timestamp: new Date().toISOString(),
@@ -52,18 +58,70 @@ export function WebSocketProvider({ children }) {
     });
 
     websocketService.on('stream_chunk', (data) => {
+      // DEBUG: Log chunk data
+      console.log('[STREAM_CHUNK] Raw data:', data);
+      console.log('[STREAM_CHUNK] Chunk content:', data.chunk);
+      console.log('[STREAM_CHUNK] Chunk type:', typeof data.chunk);
+      
+      // Accumulate chunk immediately
       streamingContentRef.current += data.chunk;
-      dispatch({
-        type: 'UPDATE_LAST_MESSAGE',
-        payload: {
-          content: streamingContentRef.current,
-        },
-      });
+      console.log('[STREAM_CHUNK] Total accumulated:', streamingContentRef.current.length, 'chars');
+      
+      // Throttle UI updates for better performance
+      const now = Date.now();
+      const timeSinceLastUpdate = now - lastUpdateTimeRef.current;
+      
+      // If enough time has passed, update immediately
+      if (timeSinceLastUpdate >= STREAM_THROTTLE_MS) {
+        lastUpdateTimeRef.current = now;
+        console.log('[STREAM_CHUNK] Dispatching UPDATE_LAST_MESSAGE');
+        dispatch({
+          type: 'UPDATE_LAST_MESSAGE',
+          payload: {
+            content: streamingContentRef.current,
+          },
+        });
+      } else {
+        // Otherwise, schedule an update
+        if (throttleTimeoutRef.current) {
+          clearTimeout(throttleTimeoutRef.current);
+        }
+        
+        throttleTimeoutRef.current = setTimeout(() => {
+          lastUpdateTimeRef.current = Date.now();
+          console.log('[STREAM_CHUNK] Dispatching delayed UPDATE_LAST_MESSAGE');
+          dispatch({
+            type: 'UPDATE_LAST_MESSAGE',
+            payload: {
+              content: streamingContentRef.current,
+            },
+          });
+          throttleTimeoutRef.current = null;
+        }, STREAM_THROTTLE_MS - timeSinceLastUpdate);
+      }
     });
 
     websocketService.on('stream_end', (data) => {
+      // Clear any pending throttle timeout
+      if (throttleTimeoutRef.current) {
+        clearTimeout(throttleTimeoutRef.current);
+        throttleTimeoutRef.current = null;
+      }
+      
+      // Final update with complete content
+      if (streamingContentRef.current) {
+        dispatch({
+          type: 'UPDATE_LAST_MESSAGE',
+          payload: {
+            content: streamingContentRef.current,
+          },
+        });
+      }
+      
+      // Mark streaming as complete
       dispatch({ type: 'SET_STREAMING', payload: false });
       streamingContentRef.current = '';
+      lastUpdateTimeRef.current = 0;
     });
 
     websocketService.on('history', (data) => {
@@ -75,7 +133,11 @@ export function WebSocketProvider({ children }) {
 
     // Cleanup on unmount
     return () => {
-      // Cleanup handlers when component unmounts
+      // Clear any pending throttle timeout
+      if (throttleTimeoutRef.current) {
+        clearTimeout(throttleTimeoutRef.current);
+      }
+      // Note: WebSocket cleanup is handled by the service itself
     };
   }, []); // Empty deps - run once
 
@@ -95,6 +157,7 @@ export function WebSocketProvider({ children }) {
     dispatch({
       type: 'ADD_MESSAGE',
       payload: {
+        id: uuidv4(), // Add unique ID for each message
         role: 'user',
         content: message,
         timestamp: new Date().toISOString(),

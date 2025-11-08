@@ -1,0 +1,97 @@
+/* Border Beam Animation Styles */
+
+/* Container (overlays on parent) */
+.border-beam-container {
+  position: absolute;
+  inset: -2px; /* Fixed offset for beam track */
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1; /* FIXED: Below content (content has z-10) */
+  overflow: visible; /* Allow beam to overflow slightly for glow effect */
+  /* Prevent container from being affected by parent's size changes */
+  contain: layout style;
+}
+
+/* Beam element - FIXED SIZE (không bị ảnh hưởng bởi container) */
+.border-beam-inner {
+  position: absolute;
+  /* CRITICAL: Fixed size, không scale theo parent */
+  width: 80px !important;  /* FIXED: Small beam size */
+  height: 80px !important; /* FIXED: Small beam size */
+  min-width: 80px;
+  min-height: 80px;
+  max-width: 80px;
+  max-height: 80px;
+  
+  /* Gradient beam - small, concentrated glow */
+  background: radial-gradient(
+    circle,
+    var(--beam-color-from, #6366F1) 0%,
+    var(--beam-color-to, #10B981) 40%,
+    transparent 70%
+  );
+  
+  /* Blur for glow effect */
+  filter: blur(10px);
+  opacity: 0.9;
+  
+  /* Animation */
+  animation: move-beam-around var(--beam-duration, 8s) linear infinite;
+  animation-delay: var(--beam-delay, 0s);
+  will-change: top, left;
+  
+  /* Ensure it stays small and doesn't scale */
+  transform-origin: center center;
+  transform: scale(1); /* Prevent any scaling */
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+
+/* Keyframes - Move around border with precise positioning */
+@keyframes move-beam-around {
+  /* Start: Top-left corner */
+  0% {
+    top: -40px;
+    left: -40px;
+  }
+  /* Move along top edge */
+  12.5% {
+    top: -40px;
+    left: calc(50% - 40px);
+  }
+  /* Top-right corner */
+  25% {
+    top: -40px;
+    left: calc(100% - 40px);
+  }
+  /* Move along right edge */
+  37.5% {
+    top: calc(50% - 40px);
+    left: calc(100% - 40px);
+  }
+  /* Bottom-right corner */
+  50% {
+    top: calc(100% - 40px);
+    left: calc(100% - 40px);
+  }
+  /* Move along bottom edge */
+  62.5% {
+    top: calc(100% - 40px);
+    left: calc(50% - 40px);
+  }
+  /* Bottom-left corner */
+  75% {
+    top: calc(100% - 40px);
+    left: -40px;
+  }
+  /* Move along left edge */
+  87.5% {
+    top: calc(50% - 40px);
+    left: -40px;
+  }
+  /* Back to start */
+  100% {
+    top: -40px;
+    left: -40px;
+  }
+}

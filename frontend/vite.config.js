@@ -26,16 +26,22 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    host: true,
-    allowedHosts: [
-      'spirit-intervention-dover-professionals.trycloudflare.com',
-      '.trycloudflare.com' // Allow all cloudflare tunnel subdomains
-    ],
+    host: '0.0.0.0',
+    strictPort: false,
+    
+    // IMPORTANT: Disable host check for cloudflare tunnel
+    allowedHosts: true,
+    
+    // Disable HMR over cloudflare tunnel to prevent reload loop
+    hmr: false,
+    
+    // Proxy API requests to local backend (for local development only)
+    // When using cloudflare tunnels, set VITE_API_URL in .env instead
     proxy: {
       '/api': {
-        target: 'https://bite-oldest-sign-lucky.trycloudflare.com',  // Fixed: backend runs on 8001
+        target: 'http://localhost:8001',  // Local backend
         changeOrigin: true,
-        // Don't rewrite /api - backend routes already have /api prefix
+        secure: false,
       }
     }
   }
